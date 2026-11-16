@@ -30,20 +30,4 @@ create trigger report_update_audit before insert or update on public.reports
  for each row execute function public.report_update_audit();
 commit;
 
--- 올바른 이메일 계정이 존재해야 등록되도록 제한합니다.
-do $$ begin
- if not exists(select 1 from auth.users where email='ojungin@mcircle.biz') then
-  raise exception 'ojungin@mcircle.biz 로그인 계정을 먼저 생성해주세요';
- end if;
-end $$;
-insert into public.members(id,name,team,role)
-select id,'오정인','우리 팀','admin' from auth.users where email='ojungin@mcircle.biz'
-on conflict(id) do update set name=excluded.name,role='admin';
-
--- 화면에서 확인한 나머지 7개 팀원만 등록. 기존 정보는 유지합니다.
-insert into public.members(id,name,team,role)
-select id,split_part(email,'@',1),'우리 팀','member' from auth.users
-where email in ('riwonkim@mcircle.biz','jaykim@mcircle.biz','hmin@mcircle.biz',
- 'cerfblanc@mcircle.biz','lyr3810@mcircle.biz','hw0213@mcircle.biz','hbjo@mcircle.biz')
-on conflict(id) do nothing;
-select name,team,role from public.members order by role,name;
+-- 팀원 등록은 사이트의 팀원 관리 화면(관리자)에서 합니다. 개인 이메일은 저장소에 두지 않습니다.
