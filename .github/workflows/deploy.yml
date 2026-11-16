@@ -26,8 +26,10 @@ jobs:
         run: node scripts/check-seminar-source.mjs
       - run: npm run build
         env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          NHOST_SUBDOMAIN: ${{ vars.NHOST_SUBDOMAIN }}
+          NHOST_REGION: ${{ vars.NHOST_REGION }}
+          NHOST_AUTH_URL: ${{ vars.NHOST_AUTH_URL }}
+          NHOST_FUNCTIONS_URL: ${{ vars.NHOST_FUNCTIONS_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
