@@ -1,10 +1,15 @@
-import {loadSupabase} from './supabase-loader.mjs?v=20261105-memberrole';
 import {emptyMetrics,activityMetrics,pointMetrics,isoWeek,dayShift,numberValue,loadSeminarMetrics} from './metrics.mjs?v=20261105-memberrole';
-let database;
-export async function dashboardClient(){if(database)return database;const response=await fetch('https://ojungin.github.io/doctorville_dash/data/config.json',{cache:'no-cache'});if(!response.ok)throw Error('통계 DB 연결 설정을 불러오지 못했습니다.');const cfg=await response.json();if(!cfg.supabaseUrl||!cfg.supabaseAnonKey)throw Error('Dashboard_DV 연결 정보가 없습니다.');const {createClient}=await loadSupabase();database=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:false,detectSessionInUrl:false,autoRefreshToken:true}});return database;}
-export async function dashboardSession(){const db=await dashboardClient();const {data,error}=await db.auth.getSession();if(error)throw error;return data.session;}
-export async function loginDashboard(email,password){const db=await dashboardClient();const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw Error('통계 계정 이메일과 비밀번호를 확인해주세요.');const p=await db.from('profiles').select('id,name,role,active').eq('id',data.user.id).maybeSingle();if(p.error||!p.data?.active||!['super','admin','dv'].includes(p.data.role)){await db.auth.signOut();throw Error('통계 DB 내부 담당자 권한이 필요합니다.');}return p.data;}
-export async function disconnectDashboard(){if(database)await database.auth.signOut();}
+// 통계 DB(Dashboard_DV)는 같은 Nhost(doctorville) DB에 있어 로그인한 계정 그대로 조회합니다.
+// 조회 권한은 대시보드와 같은 기준(profiles.active, role super/admin/dv)을 DB 함수(teamwork.dashboard_*)가 확인합니다.
+let database,profile,disconnected=false;
+const allowed=p=>!!(p&&p.active&&['super','admin','dv'].includes(p.role));
+export function useDashboardClient(client){database=client;profile=undefined;disconnected=false;}
+export async function dashboardClient(){if(!database)throw Error('업무보고 사이트에 로그인한 뒤 이용해주세요.');return database;}
+export async function dashboardSession(){if(!database||disconnected)return null;const {data,error}=await database.auth.getSession();if(error)throw error;if(!data.session)return null;
+ if(profile===undefined){const r=await database.rpc('dashboard_profile');if(r.error)throw Error('통계 DB 권한을 확인하지 못했습니다: '+r.error.message);profile=r.data?.[0]||null;}
+ return allowed(profile)?data.session:null;}
+export async function loginDashboard(){disconnected=false;profile=undefined;if(!await dashboardSession())throw Error('이 계정에는 통계 DB 내부 담당자 권한(super·admin·dv)이 없습니다. 통계 사이트 관리자에게 권한을 요청해주세요.');return profile;}
+export async function disconnectDashboard(){disconnected=true;profile=undefined;}
 export function dashboardKeys(week){const keys=['api|activity','file|data/pv_activity.enc.json','file|data/points.enc.json','file|data/pv_points.enc.json'];for(const svc of ['dv','pv']){keys.push('api|get|'+svc);for(const day of [week,dayShift(week,-7)]){const w=isoWeek(day);keys.push('api|get|'+svc+'|'+JSON.stringify({week:w}),'file|data/'+(svc==='pv'?'pv/':'')+'snapshots/'+w+'.enc.json');}}return keys;}
 export function databaseSummary(records,week){const summary=emptyMetrics(week),map=new Map(records.map(r=>[r.key,r]));summary.source='Dashboard_DV.datasets';summary.sections[0].note='Dashboard_DV DB 저장본 · 원본을 갱신하려면 통계 사이트에서 갱신해주세요.';summary.sections[0].platform_notes={};const notes=[],details=[];
 for(const [svc,platform] of [['dv','닥터빌'],['pv','팜빌']]){
@@ -17,7 +22,7 @@ for(const [svc,platform] of [['dv','닥터빌'],['pv','팜빌']]){
 }
 summary.sections[2].platform_details=details;summary.sections[2].platform_notes=Object.fromEntries(notes);summary.sections[2].note='Dashboard_DV DB 저장본 · '+notes.map(([p,n])=>p+': '+n).join('\n');summary.fetched_at=new Date().toISOString();return summary;
 }
-export async function loadDatabaseMetrics(week,options={}){let rows;if(options.records)rows=options.records;else{const db=await dashboardClient();const session=await dashboardSession();if(!session)throw Error('통계 DB 계정으로 연결해주세요.');const result=await db.from('datasets').select('key,data,fetched_at').in('key',dashboardKeys(week));if(result.error)throw Error('통계 DB 조회 실패: '+result.error.message);rows=result.data||[];}const summary=databaseSummary(rows,week);try{summary.sections[1]=await (options.seminar||loadSeminarMetrics)(week)}catch(err){summary.sections[1].note='세미나 조회 실패: '+err.message}return summary;}
+export async function loadDatabaseMetrics(week,options={}){let rows;if(options.records)rows=options.records;else{const db=await dashboardClient();const session=await dashboardSession();if(!session)throw Error('통계 DB 계정으로 연결해주세요.');const result=await db.rpc('dashboard_datasets',{dataset_keys:dashboardKeys(week)});if(result.error)throw Error('통계 DB 조회 실패: '+result.error.message);rows=result.data||[];}const summary=databaseSummary(rows,week);try{summary.sections[1]=await (options.seminar||loadSeminarMetrics)(week)}catch(err){summary.sections[1].note='세미나 조회 실패: '+err.message}return summary;}
 
 
 // ---- 월간 지표: 통합 통계(Dashboard_DV) 리포트 저장본(report|svc|생성시각)의 월간 지표 정의를 그대로 사용 ----
@@ -110,7 +115,7 @@ export async function loadMonthlyDatabaseMetrics(month,options={}){
  const {querySeminarSheet,parseGVizResponse,seminarRowsFromTable}=await import('./metrics.mjs?v=20261105-memberrole');
  let records=options.records;
  if(!records){const db=await dashboardClient();if(!await dashboardSession())throw Error('통계 DB 계정을 연결해주세요.');
-  const result=await Promise.all(['dv','pv'].map(svc=>db.from('datasets').select('key,data,fetched_at').like('key','report|'+svc+'|%').order('fetched_at',{ascending:false}).limit(1)));
+  const result=await Promise.all(['dv','pv'].map(svc=>db.rpc('dashboard_latest_report',{svc})));
   for(const r of result)if(r.error)throw Error('통계 DB 조회 실패: '+r.error.message);
   records=result.flatMap(r=>r.data||[]);
  }
