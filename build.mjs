@@ -1,6 +1,6 @@
 import {mkdir,copyFile,writeFile} from 'node:fs/promises';
 await mkdir('dist',{recursive:true});
-for(const file of ['index.html','style.css','app.js','core.mjs','weekly.mjs','portal.mjs','excel.mjs','metrics.mjs','dashboard-db.mjs','team-goals.mjs','team-responsibilities.mjs','handover.mjs','member-admin.mjs','goal-management.mjs','personal-goals.mjs','kpi-export.mjs','report-design.mjs','nhost-client.mjs','report-ai.mjs','monthly-report.mjs','config.js'])await copyFile(file,'dist/'+file);
+for(const file of ['index.html','style.css','app.js','core.mjs','weekly.mjs','portal.mjs','excel.mjs','metrics.mjs','dashboard-db.mjs','team-goals.mjs','home-summary.mjs','team-responsibilities.mjs','handover.mjs','member-admin.mjs','goal-management.mjs','personal-goals.mjs','kpi-export.mjs','report-design.mjs','nhost-client.mjs','report-ai.mjs','monthly-report.mjs','config.js'])await copyFile(file,'dist/'+file);
 // Nhost 연결 정보(공개 값만): NHOST_SUBDOMAIN, NHOST_REGION. 함수 주소를 직접 지정하려면 NHOST_AUTH_URL·NHOST_FUNCTIONS_URL.
 const env=process.env,cfg={nhostSubdomain:env.NHOST_SUBDOMAIN||'',nhostRegion:env.NHOST_REGION||'',authUrl:env.NHOST_AUTH_URL||'',functionsUrl:env.NHOST_FUNCTIONS_URL||''};
 if(!!cfg.nhostSubdomain!==!!cfg.nhostRegion)throw Error('NHOST_SUBDOMAIN과 NHOST_REGION을 모두 설정하세요.');
