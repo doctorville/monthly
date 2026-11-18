@@ -171,3 +171,44 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:13px 12px
 .wb-drawer .task-editor{border:0;padding:0;margin:0}
 .wb-drawer .task-meta-row{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (max-width:760px){.wb-control-row,.wb-notes{grid-template-columns:1fr}.wb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.mboard-inner{min-width:720px}.mb-row{grid-template-columns:240px minmax(0,1fr)}}
+
+/* 주간업무성과 리포트 생성 */
+.weekly-gen .wg-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.weekly-gen .wg-head h1{padding:0;margin:0;font-size:24px}
+.weekly-gen .wg-downloads{display:flex;gap:6px;flex-wrap:wrap}
+.weekly-gen .wg-dl{font-size:12px;padding:4px 10px;min-height:0;line-height:1.4;border-radius:6px}
+.weekly-gen .wg-top{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px}
+.weekly-gen .calendar{padding:12px;margin:0}
+.weekly-gen .calendar .toolbar{gap:6px;flex-wrap:nowrap}
+.weekly-gen .calendar .toolbar button{padding:4px 10px;min-height:0}
+.weekly-gen .calendar .toolbar label{font-size:12px}
+.weekly-gen .calendar .toolbar input{padding:4px 6px;font-size:12px}
+.weekly-gen .calendar-grid{gap:2px}
+.weekly-gen .calendar-grid>strong{padding:4px 0;font-size:11px}
+.weekly-gen .calendar-grid button{min-height:34px;padding:2px;font-size:12px}
+.weekly-gen .calendar-grid .has-report small{font-size:9px}
+.weekly-gen .calendar>p{font-size:11px;margin:6px 0 0}
+.weekly-gen .wg-info{margin:0}
+.weekly-gen .wg-info label{font-weight:600;font-size:13px}
+.weekly-gen .wg-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.wg-flow{position:fixed;right:24px;bottom:calc(24px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(17,24,39,.18);padding:16px 18px;z-index:45}
+.wg-flow-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.wg-flow-head strong{display:block;font-size:15px}.wg-flow-head .muted{font-size:12px}
+.wg-flow-head button{padding:2px 9px;font-size:18px;line-height:1;min-height:0}
+.wg-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.wg-steps li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;font-size:13px;color:var(--sub)}
+.wg-steps li b{color:var(--ink);font-weight:600}.wg-steps li p{margin:2px 0 0;font-size:12px}
+.wg-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;box-sizing:border-box}
+.wg-steps li.done .wg-dot{background:#2F9E6E;border-color:#2F9E6E;color:#fff}
+.wg-steps li.active .wg-dot{border-color:var(--primary);border-top-color:transparent;animation:wg-spin .8s linear infinite}
+.wg-steps li.error .wg-dot{background:#C53030;border-color:#C53030;color:#fff}.wg-steps li.error p{color:#C53030}
+.wg-steps li.skip .wg-dot{background:#EEF0F6;color:var(--sub)}
+.wg-flow-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+@keyframes wg-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.wg-steps li.active .wg-dot{animation:none;border-top-color:var(--primary)}}
+@media (max-width:760px){.weekly-gen .wg-top{grid-template-columns:1fr}.wg-flow{right:16px;left:16px;width:auto}}
+
+/* 업무 편집 창: 금주 한 일 · 차주 할 일 */
+.task-week-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.task-week-notes textarea{min-height:120px}
+@media (max-width:560px){.task-week-notes{grid-template-columns:1fr}}

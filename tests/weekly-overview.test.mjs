@@ -17,16 +17,15 @@ test('metric highlights give the model display strings only and skip missing val
  assert.deepEqual(metricHighlights(m),[{group:'회원 및 활동성',platform:'팜빌',name:'MAU',current:'1,200명',previous:'1,000명',change:'전주 대비 +200명 (+20.0%)'},{group:'포인트',platform:'닥터빌',name:'지급 포인트',current:'500P',previous:'500P',change:'전주와 동일'}]);
  assert.ok(summaryInstructions.includes('metric_highlights'));
 });
-test('section 1 shows the overview by area before status cards, with a clear message for older documents',()=>{
- const html=weeklyBody(snap({...empty(),overview:[{area:'금주 이슈 및 대응',summary:'이슈 <대응> 완료',report_ids:['r']},{area:'주요 지표',summary:'MAU 상승',report_ids:[]},{area:'주요 업무',summary:'첫째',report_ids:['r']},{area:'주요 업무',summary:'둘째',report_ids:['r']}]}));
- const sec=html.slice(html.indexOf('1. 보고서 요약'),html.indexOf('2. 주요 지표'));
- assert.ok(sec.indexOf('MAU 상승')<sec.indexOf('첫째\n둘째'));assert.ok(sec.indexOf('첫째')<sec.indexOf('이슈 &lt;대응&gt; 완료'));assert.ok(sec.indexOf('이슈 &lt;대응')<sec.indexOf('report-stats'));
- assert.ok(weeklyBody(snap({...empty()})).includes('핵심 요약 기능 이전에 생성'));assert.ok(weeklyBody(snap()).includes('핵심 요약이 아직 생성되지 않았습니다'));
+test('weekly report body no longer shows the GPT overview, while the overview data stays available',()=>{
+ const html=weeklyBody(snap({...empty(),overview:[{area:'주요 지표',summary:'MAU 상승',report_ids:[]}]}));
+ assert.ok(!html.includes('MAU 상승'));assert.ok(!html.includes('1. 보고서 요약'));
  assert.equal(weeklyOverview(snap({...empty(),overview:[]})).status,'ready');
 });
-test('Excel section 1 lists the overview rows',()=>{
- const layout=weeklyExcelLayout(snap({...empty(),overview:[{area:'주요 업무',summary:'업무 요약',report_ids:['r']}]})),i=layout.rows.findIndex(r=>r.cells[0]?.value==='구분'&&r.cells[1]?.value==='핵심 내용');
- assert.ok(i>0);assert.deepEqual(layout.rows[i+1].cells.map(c=>c.value),['주요 업무','업무 요약']);
+
+test('Excel no longer lists the GPT overview rows',()=>{
+ const layout=weeklyExcelLayout(snap({...empty(),overview:[{area:'주요 업무',summary:'업무 요약',report_ids:['r']}]}));
+ assert.ok(!layout.rows.some(r=>r.cells[0]?.value==='구분'&&r.cells[1]?.value==='핵심 내용'));assert.ok(!JSON.stringify(layout).includes('업무 요약'));
 });
 test('weekly edge function request includes precomputed metric highlights and stores the overview',async()=>{
  const code=stripTypeScriptTypes(await readFile(new URL('../supabase/functions/report-ai/index.ts',import.meta.url),'utf8'));
