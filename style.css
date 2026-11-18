@@ -70,3 +70,38 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:13px 12px
 .account-table tr.account-dup td{background:#FFF1EF}.account-table td button{padding:6px 10px;font-size:13px}
 .member-role-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:6px}.member-role-row label{margin:0;min-width:200px}.member-role-row button{padding:10px 14px}
 .sub-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line)}.sub-tabs button{background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--sub)}.sub-tabs button.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}.grouped-navigation>.statistics-menu-link{display:block;padding:10px 12px;font-size:13px;border-top:1px solid var(--line);margin-top:8px}.business-goal ul{margin:8px 0 0;padding-left:20px}
+
+/* 홈: 팜빌 PM 홈과 같은 구조 */
+.home-dash{--bad:#C53030;--bad-soft:#FDECEC;--warn:#B7791F;--warn-soft:#FFF4E0;--ok:#2F9E6E}
+.home-dash .home-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.home-dash .home-head h1{padding:0;margin:0 0 4px;font-size:24px}
+.home-dash .home-head p{margin:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.home-dash .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.home-dash .kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:2px;min-width:0}
+.home-dash .kpi .k,.home-dash .kpi .sub{font-size:12px;color:var(--sub)}
+.home-dash .kpi .v{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;color:var(--ink)}
+.home-dash .kpi.bad{background:var(--bad-soft);border-color:transparent}.home-dash .kpi.bad .v{color:var(--bad)}
+.home-dash .kpi.warn{background:var(--warn-soft);border-color:transparent}.home-dash .kpi.warn .v{color:var(--warn)}
+.home-dash .home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.home-dash .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px;align-content:start;min-width:0}
+.home-dash .card h3{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0;font-size:15px}
+.home-dash .card h3 .muted{font-weight:400;font-size:13px}
+.home-dash .hlist{list-style:none;margin:0;padding:0;display:grid}
+.home-dash .hl{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:7px 4px;border-top:1px solid var(--line);font-size:13px}
+.home-dash button.hl{cursor:pointer}.home-dash button.hl:hover{background:#F5F6FA}.home-dash button.hl:focus-visible{outline:2px solid var(--primary)}
+.home-dash .hlist li:first-child .hl{border-top:0}
+.home-dash .hl-name{overflow-wrap:anywhere}.home-dash .hl-name small{color:var(--sub)}
+.home-dash .hl-team,.home-dash .hl-due{font-size:12px;white-space:nowrap}.home-dash .hl-due b{font-weight:700;color:var(--ink)}
+.home-dash .mono{font-variant-numeric:tabular-nums}
+.home-dash .more{all:unset;cursor:pointer;font-size:12px;font-weight:400;color:var(--primary)}
+.home-dash .home-empty,.home-dash .home-more{margin:0;font-size:13px}
+.home-dash .bars{display:grid;gap:6px}
+.home-dash .bar-row{display:grid;grid-template-columns:84px minmax(0,1fr) 28px;gap:8px;align-items:center;font-size:13px;margin:0}
+.home-dash .bl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-dash .bt{height:10px;background:#EEF0F6;border-radius:5px;overflow:hidden}
+.home-dash .bf{display:block;height:100%;background:var(--primary);border-radius:5px}
+.home-dash .bf.s-완료{background:var(--ok)}.home-dash .bf.s-보류{background:#9AA3B5}
+.home-dash .bn{text-align:right}
+.home-dash .bar-sub{font-size:11px;margin:-2px 0 4px 92px}
+.home-dash .bad-t{color:var(--bad);font-weight:600}.home-dash .warn-t{color:var(--warn);font-weight:600}
+@media (max-width:760px){.home-dash .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.home-dash .home-grid{grid-template-columns:1fr}.home-dash .hl{grid-template-columns:auto minmax(0,1fr) auto}.home-dash .hl-team{display:none}.home-dash .bar-sub{margin-left:0}}
