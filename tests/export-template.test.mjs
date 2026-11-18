@@ -4,12 +4,13 @@ const fixture=()=>{const metrics=emptyMetrics('2026-10-05');metrics.fetched_at='
 test('Excel layout follows the 13-column template and preserves typed metric/date/progress values',()=>{
  const s=fixture(),layout=weeklyExcelLayout(s);assert.equal(layout.rows[0].row,5);assert.equal(layout.rows[0].cells[0].from,2);assert.equal(layout.rows[0].cells[0].to,14);
  const metric=layout.rows.find(r=>r.cells[0]?.value==='전체 회원');assert.deepEqual(metric.cells.map(c=>[c.from,c.to]),[[2,4],[5,6],[7,7],[8,14]]);assert.equal(metric.cells[1].value,1900);assert.equal(metric.cells[2].value,2000);
- const task=layout.rows.find(r=>r.cells[1]?.value==='주요 업무');assert.equal(task.cells[6].from,8);assert.equal(task.cells[6].to,12);assert.ok(task.cells[3].value instanceof Date);assert.equal(task.cells[4].value,.75);
- const text=JSON.stringify(layout);assert.ok(!text.includes('METRIC_METHOD_NOTE'));assert.ok(!text.includes('DATABASE_TIMESTAMP'));assert.ok(!text.includes('FETCH_TIMESTAMP'));assert.ok(!text.includes('https://'));assert.ok(text.includes('요약 내용'));assert.ok(text.includes('이슈 원문'));
+ const task=layout.rows.find(r=>r.cells[1]?.value==='주요 업무');assert.deepEqual(task.cells.map(c=>[c.from,c.to]),[[2,2],[3,4],[5,5],[6,6],[7,7],[8,8],[9,9],[10,10],[11,14]]);assert.equal(task.cells[5].value,.75);assert.ok(task.cells[6].value instanceof Date);assert.ok(task.cells[7].value instanceof Date);
+ const note=layout.rows.find(r=>r.cells[0]?.value==='담당자'&&r.cells[1]?.value==='이슈 원문');assert.deepEqual(note.cells.map(c=>[c.from,c.to,c.value]),[[2,3,'담당자'],[4,8,'이슈 원문'],[9,14,'다음주 원문']]);
+ const text=JSON.stringify(layout);assert.ok(!text.includes('METRIC_METHOD_NOTE'));assert.ok(!text.includes('DATABASE_TIMESTAMP'));assert.ok(!text.includes('FETCH_TIMESTAMP'));assert.ok(!text.includes('https://'));assert.ok(!text.includes('요약 내용'));
 });
 test('long cell text splits into continuation rows without dropping content',()=>{
  const long=('긴 업무 성과와 숫자 123\n').repeat(150),chunks=splitExcelText(long,40);assert.ok(chunks.length>1);assert.equal(chunks.join(''),long);
- const s=fixture();s.reports[0].items[0].result=long;const layout=weeklyExcelLayout(s);const pieces=layout.rows.flatMap(r=>r.cells.filter(c=>c.from===8&&c.to===12&&typeof c.value==='string'&&c.value.includes('긴 업무')).map(c=>c.value));assert.equal(pieces.join(''),long);assert.ok(layout.rows.every(r=>r.height<=409.5));
+ const s=fixture();s.reports[0].items[0].result=long;const layout=weeklyExcelLayout(s);const pieces=layout.rows.flatMap(r=>r.cells.filter(c=>c.from===11&&c.to===14&&typeof c.value==='string'&&c.value.includes('긴 업무')).map(c=>c.value));assert.equal(pieces.join(''),long);assert.ok(layout.rows.every(r=>r.height<=409.5));
 });
 test('screen and HTML retain metric notes/sources; print options remove metadata without stripping task text',()=>{
  const s=fixture(),screen=weeklyBody(s),html=documentHTML(s,'weekly'),print=documentHTML(s,'weekly',{includeMetricMetadata:false});
@@ -19,10 +20,10 @@ test('screen and HTML retain metric notes/sources; print options remove metadata
 test('Word and PDF request the print-only view while HTML keeps the default view',async()=>{
  const source=await readFile(new URL('../portal.mjs',import.meta.url),'utf8');assert.ok(source.includes("documentHTML(s,kind,{includeMetricMetadata:false})"));assert.ok(source.includes('host.innerHTML=documentBody(s,kind,{includeMetricMetadata:false})'));assert.ok(source.includes("new Blob([documentHTML(s,kind)]"));
 });
-test('Excel layout uses the five weekly sections with metric subsections',()=>{
+test('Excel layout uses the weekly report sections: metrics, main work, 한 일 · 할 일',()=>{
  const layout=weeklyExcelLayout(fixture()),titles=layout.rows.filter(r=>r.kind==='section').map(r=>r.cells[0].value),subs=layout.rows.filter(r=>r.kind==='subsection').map(r=>r.cells[0].value);
- assert.deepEqual(titles,['1. 보고서 요약','2. 주요 지표','3. 주요 업무','4. 금주 이슈 및 대응','5. 차주 계획']);assert.deepEqual(subs,['2-1. 회원 및 활동성','2-2. 비학술 세미나 기획 및 운영','2-3. 포인트 지급·사용·잔여']);
- assert.ok(JSON.stringify(layout).includes('차주 계획'));assert.ok(!JSON.stringify(layout).includes('다음 주 계획'));
+ assert.deepEqual(titles,['1. 주요 지표','2. 금주 주요 업무','3. 한 일 · 할 일']);assert.deepEqual(subs,['1-1. 회원 및 활동성','1-2. 비학술 세미나 기획 및 운영','1-3. 포인트 지급·사용·잔여']);
+ assert.equal(layout.title,'2026-10-05 주간 업무성과 리포트');
 });
 test('all local module imports share one cache-busting version',async()=>{
  const {readdir}=await import('node:fs/promises');const files=['app.js',...(await readdir(new URL('..',import.meta.url))).filter(f=>f.endsWith('.mjs'))];const tags=new Set();
