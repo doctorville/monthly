@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 import {sanitizeRichText,handoverItems,visibleHandovers,saveHandover,parseUrls,handoverBody,handoverTitle} from '../handover.mjs';
-import {kpiMenus,navigationHTML} from '../portal.mjs';
-test('인수인계서 is the last KPI menu and is routed',async()=>{
- assert.deepEqual(kpiMenus.at(-1),['kpi-handover','인수인계서']);
+import {workMenus,navigationHTML} from '../portal.mjs';
+test('인수인계서 is the last 업무 관리 menu and is routed',async()=>{
+ assert.deepEqual(workMenus.at(-1),['kpi-handover','인수인계서']);
  assert.match(navigationHTML('kpi-handover',false),/data-view="kpi-handover" class="active"/);
  const app=await readFile(new URL('../app.js',import.meta.url),'utf8');assert.match(app,/'kpi-handover':kpiHandoverPage/);
  const build=await readFile(new URL('../build.mjs',import.meta.url),'utf8');assert.match(build,/'handover\.mjs'/);

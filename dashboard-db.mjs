@@ -1,4 +1,4 @@
-import {emptyMetrics,activityMetrics,pointMetrics,isoWeek,dayShift,numberValue,loadSeminarMetrics} from './metrics.mjs?v=20261105-memberrole';
+import {emptyMetrics,activityMetrics,pointMetrics,isoWeek,dayShift,numberValue,loadSeminarMetrics} from './metrics.mjs?v=20261118-ia';
 // 통계 DB(Dashboard_DV)는 같은 Nhost(doctorville) DB에 있어 로그인한 계정 그대로 조회합니다.
 // 조회 권한은 대시보드와 같은 기준(profiles.active, role super/admin/dv)을 DB 함수(teamwork.dashboard_*)가 확인합니다.
 let database,profile,disconnected=false;
@@ -112,7 +112,7 @@ export function monthlyDatabaseSummary(records,month,seminars){
  return summary;
 }
 export async function loadMonthlyDatabaseMetrics(month,options={}){
- const {querySeminarSheet,parseGVizResponse,seminarRowsFromTable}=await import('./metrics.mjs?v=20261105-memberrole');
+ const {querySeminarSheet,parseGVizResponse,seminarRowsFromTable}=await import('./metrics.mjs?v=20261118-ia');
  let records=options.records;
  if(!records){const db=await dashboardClient();if(!await dashboardSession())throw Error('통계 DB 계정을 연결해주세요.');
   const result=await Promise.all(['dv','pv'].map(svc=>db.rpc('dashboard_latest_report',{svc})));

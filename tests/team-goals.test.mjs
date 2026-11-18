@@ -1,1 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {validateGoal,validateStrategy} from '../team-goals.mjs';test('goals require year category and both business and team objectives',()=>{const g={year:2026,category:'공통',business_goal:'성장',team_goal:'회원 확대'};assert.doesNotThrow(()=>validateGoal(g));assert.throws(()=>validateGoal({...g,year:2026.5}));assert.throws(()=>validateGoal({...g,category:'기타'}));assert.throws(()=>validateGoal({...g,team_goal:''}));});test('strategies require an existing goal and valid half or quarter',()=>{const s={goal_id:'g',period_type:'half',period:'상반기',strategy:'실행'};assert.doesNotThrow(()=>validateStrategy(s,[{id:'g'}]));assert.doesNotThrow(()=>validateStrategy({...s,period_type:'quarter',period:'4분기'},[{id:'g'}]));assert.throws(()=>validateStrategy(s,[]));assert.throws(()=>validateStrategy({...s,period:'1분기'},[{id:'g'}]));assert.throws(()=>validateStrategy({...s,strategy:''},[{id:'g'}]));});
+import {businessGoalRows as rows} from '../team-goals.mjs';
+test('business goals group team goals by category and goal text for the year',()=>{
+ const g=[{year:2026,category:'팜빌',business_goal:'약사 회원 확대',team_goal:'B'},{year:2026,category:'닥터빌',business_goal:' 회원 활성화 ',team_goal:'A1'},{year:2026,category:'닥터빌',business_goal:'회원 활성화',team_goal:'A2'},{year:2025,category:'닥터빌',business_goal:'회원 활성화',team_goal:'old'}];
+ assert.deepEqual(rows(g,2026),[{category:'닥터빌',business_goal:'회원 활성화',teams:['A1','A2']},{category:'팜빌',business_goal:'약사 회원 확대',teams:['B']}]);
+ assert.deepEqual(rows(g,2024),[]);
+});
