@@ -59,9 +59,17 @@ export function createClient(cfg={},{fetch:fetchImpl=globalThis.fetch.bind(globa
   return refreshing;
  }
  async function token(){const s=await refresh();if(!s)throw Object.assign(Error('로그인이 만료되었습니다. 다시 로그인해주세요.'),{status:401});return s.accessToken;}
+ // [통합 포털] 포털(doctorville.github.io/portal)에서 넘어온 경우: 포털이 남긴 1회용 PAT로 이 서비스 전용 세션을 새로 발급.
+ // 포털을 거치지 않고 직접 접속하면 handoff 값이 없으므로 기존처럼 이메일 인증코드로 로그인한다.
+ const HANDOFF='portal.handoff.monthly';
+ async function consumeHandoff(){
+ let h=null;try{h=JSON.parse(storage.getItem(HANDOFF)||'null');storage.removeItem(HANDOFF);}catch{}
+ if(!h||!h.pat||!(h.exp>now()))return;
+ try{const r=await post(authUrl+'/signin/pat',{personalAccessToken:h.pat});if(r.ok&&r.json?.session)save(fromNhost(r.json.session));}catch{}
+ }
  const client={
   auth:{
-   async getSession(){try{return {data:{session:asSession(await refresh())},error:null};}catch(err){return {data:{session:null},error:err};}},
+   async getSession(){try{await consumeHandoff();return {data:{session:asSession(await refresh())},error:null};}catch(err){return {data:{session:null},error:err};}},
    async signInWithOtp({email}){const r=await post(authUrl+'/signin/otp/email',{email:String(email||'').trim().toLowerCase()});return r.ok?{data:{},error:null}:{data:null,error:authError(r.status,r.json,'인증코드를 보내지 못했습니다.')};},
    async verifyOtp({email,token:otp}){const r=await post(authUrl+'/signin/otp/email/verify',{email:String(email||'').trim().toLowerCase(),otp:String(otp||'')});
     if(!r.ok||!r.json?.session)return {data:null,error:authError(r.status,r.json,'인증코드가 맞지 않습니다.')};
